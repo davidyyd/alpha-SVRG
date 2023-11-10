@@ -6,7 +6,7 @@ Official PyTorch implementation for $\alpha$-SVRG
 > <br>UC Berkeley, University of Pennsylvania, Toyota Technological Institute at Chicago, and Meta AI Research<br>
 
 <p align="center">
-<img src=
+<img src="https://github.com/davidyyd/alpha-SVRG/assets/91447088/c066c778-8819-4aa3-a5b8-49999fdebec5"
 class="center">
 </p>
 
