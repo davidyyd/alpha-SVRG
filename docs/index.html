@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description"
+        content="A Coefficient Makes SVRG Effective.">
+  <meta name="keywords" content="optimization, variance reduction, SVRG">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>A Coefficient Makes SVRG Effective</title>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+        rel="stylesheet">
+
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <link rel="icon" href="data:,">
+
+  <style>
+    body {
+      font-size: 1.3rem;
+    }
+    .formula-cell {
+      max-width: 33.33%;
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+    .formula-cell::-webkit-scrollbar {
+      height: 4px;
+    }
+    .formula-cell::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 2px;
+    }
+    .table td, .table th {
+      padding: 2rem 0.75rem;
+      vertical-align: middle;
+    }
+  </style>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script src="./static/js/bulma-carousel.min.js"></script>
+  <script src="./static/js/bulma-slider.min.js"></script>
+  <script src="./static/js/index.js"></script>
+
+    <!-- MathJax v3 -->
+    <script>
+      window.MathJax = {
+        tex: {
+          inlineMath: [['\\(', '\\)']],
+          displayMath: [['$$','$$']],
+          packages: ['base', 'ams', 'physics', 'noerrors', 'noundefined']
+        },
+        svg: { fontCache: 'global' }
+      };
+    </script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"
+      integrity="sha384-…"
+      crossorigin="anonymous">
+    </script>
+</head>
+<body>
+
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-1 publication-title">A Coefficient Makes SVRG Effective</h1>
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">
+              <a href="https://davidyyd.github.io/">Yida Yin</a><sup>1</sup>,</span>
+            <span class="author-block">
+              <a href="https://oscarxzq.github.io">Zhiqiu Xu</a><sup>2</sup>,</span>
+            <span class="author-block">
+              <a href="https://zhiyuanli.ttic.edu">Zhiyuan Li</a><sup>3</sup>,
+            </span>
+            <span class="author-block">
+              <a href="https://people.eecs.berkeley.edu/~trevor/">Trevor Darrell</a><sup>1</sup>,
+            </span>
+            <span class="author-block">
+              <a href="https://liuzhuang13.github.io">Zhuang Liu</a><sup>4</sup>
+            </span>
+          </div>
+
+          <div class="is-size-5 publication-authors">
+            <span class="author-block"><sup>1</sup>UC Berkeley</span>,
+            <span class="author-block"><sup>2</sup>University of Pennsylvania</span>,
+            <span class="author-block"><sup>3</sup>TTIC</span>,
+            <span class="author-block"><sup>4</sup>Meta AI Research</span>
+          </div>
+
+          <p>
+            <span class="is-size-5"><b>ICLR 2025</b><span>
+          </p>
+
+          <div class="column has-text-centered">
+            <div class="publication-links">
+              <!-- arXiv Link. -->
+              <span class="link-block">
+                <a href="https://arxiv.org/abs/2311.05589"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="ai ai-arxiv"></i>
+                  </span>
+                  <span>arXiv</span>
+                </a>
+              </span>
+              <!-- Video Link. -->
+              <span class="link-block">
+                <a href="https://iclr.cc/virtual/2025/poster/28009"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fab fa-youtube"></i>
+                  </span>
+                  <span>Video</span>
+                </a>
+              </span>
+              <!-- Code Link. -->
+              <span class="link-block">
+                <a href="https://github.com/davidyyd/alpha-SVRG"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fab fa-github"></i>
+                  </span>
+                  <span>Code</span>
+                  </a>
+              </span>
+            </div>
+
+          </div>
+          <div class="columns is-centered">
+            <div class="column is-full">
+              <img src="https://github.com/davidyyd/alpha-SVRG/assets/91447088/c88e671c-ec7c-4b79-a6bd-b3c6f7e5908c" style="max-width: 100%; height: auto;" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <!-- Abstract. -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            Stochastic Variance Reduced Gradient (SVRG), introduced by <a href="https://papers.nips.cc/paper_files/paper/2013/file/ac1dd209cbcc5e5d1c6e28598e8cbbe8-Paper.pdf">Johnson & Zhang (2013)</a>, is a theoretically compelling optimization method. However, as <a href="https://arxiv.org/abs/1812.04529">Defazio & Bottou (2019)</a> highlight, its effectiveness in deep learning is yet to be proven. In this work, we demonstrate the potential of SVRG in optimizing real-world neural networks. Our empirical analysis finds that, for deeper neural networks, the strength of the variance reduction term in SVRG should be smaller and decrease as training progresses. Inspired by this, we introduce a multiplicative coefficient \(\alpha\) to control the strength and adjust it through a linear decay schedule. We name our method \(\alpha\)-SVRG. Our results show \(\alpha\)-SVRG better optimizes models, consistently reducing training loss compared to the baseline and standard SVRG across various model architectures and multiple image classification datasets. We hope our findings encourage further exploration into variance reduction techniques in deep learning.
+          </p>
+        </div>
+      </div>
+    </div>
+    <!--/ Abstract. -->
+  </div>
+</section>
+
+<section class="section">
+  <div class="container is-max-desktop">
+
+    
+    <div class="columns is-centered">
+      <div class="column is-full">
+        <h2 class="title is-3 has-text-centered">Background</h2>
+      </div>
+    </div>
+    <h3 class="title is-4">SVRG</h3>
+    <p>
+      Proposed in 2013, SVRG is a simple approach for reducing gradient variance in SGD. It works very well in simple machine learning models, such as Logistic Regression.
+
+      $$g_i^t = \nabla f_i(\theta^t)-(\nabla f_i(\theta^{\text{snapshot}})-\nabla f(\theta^{\text{snapshot}}))$$
+      
+    </p>
+    <br>
+
+    <h3 class="title is-4">Gradient Variance</h3>
+    <p>
+      We use the following metrics to measure the gradient variance during training:
+    </p>
+    <table class="table is-bordered is-striped is-narrow is-hoverable is-fullwidth">
+      <thead>
+        <tr>
+          <th class="is-one-third">name</th>
+          <th class="is-one-third">formula</th>
+          <th class="is-one-third">description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="is-one-third">metric 1</td>
+          <td class="is-one-third">\(\frac{2}{N(N-1)}\sum_{i\neq j}\frac{1}{2}(1-\frac{\langle g_i^t,g_j^t\rangle}{\|g_i^t\|_2\|g_j^t\|_2})\)</td>
+          <td class="is-one-third">the directional variance of the gradients</td>
+        </tr>
+        <tr>
+          <td class="is-one-third">metric 2</td>
+          <td class="is-one-third">\(\sum_{k=1}^d\text{Var}(g_{i, k}^t)\)</td>
+          <td class="is-one-third">the variance of gradients across each component</td>
+        </tr>
+        <tr>
+          <td class="is-one-third">metric 3</td>
+          <td class="is-one-third">\(\lambda_{max}(\frac{1}{N}\sum_{i=1}^N(g_i^t-g^t)(g_i^t-g^t)^T)\)</td>
+          <td class="is-one-third">the magnitude of the most significant variation</td>
+        </tr>
+      </tbody>
+    </table>
+    
+  <br>
+  <h3 class="title is-4">SVRG on MLP-4</h3>
+  <p>We observe that SVRG might even <b>increase</b> gradient variance on MLP-4 and leads to slower convergence.</p>
+  <br>
+  <div class="columns is-multiline is-centered">
+    <div class="column is-half">
+      <figure class="image">
+        <img src="./static/images/baseline_vs_svrg_var_0.pdf" alt="Variance metric 1">
+      </figure>
+    </div>
+    <div class="column is-half">
+      <figure class="image">
+        <img src="./static/images/baseline_vs_svrg_var_1.pdf" alt="Variance metric 2">
+      </figure>
+    </div>
+    <div class="column is-half">
+      <figure class="image">
+        <img src="./static/images/baseline_vs_svrg_var_2.pdf" alt="Variance metric 3">
+      </figure>
+    </div>
+    <div class="column is-half">
+      <figure class="image">
+        <img src="./static/images/baseline_vs_svrg_sgd_loss.pdf" alt="Training loss">
+      </figure>
+    </div>
+  </div>
+
+
+  <p><b><i>Why does SVRG increase gradient variance on deeper models?</i></b></p>
+  <br>
+  <br>
+  <div class="columns is-centered">
+    <div class="column is-full">
+      <h2 class="title is-3 has-text-centered">Analysis</h2>
+    </div>
+  </div>
+
+  <h3 class="title is-4">Control Variates</h3>
+  <p>The Control Variates method reduces the variance of the estimate \(\textnormal{X}\) using another correlated random variable \(\textnormal{Y}\). We can derive the optimal coefficient \(\alpha\) that minimizes the variance of the estimate:</p>
+  <div style="margin: 0.6em 0;">
+    <div class="equation">
+    $$\textnormal{X}^* = \textnormal{X} - \alpha (\textnormal{Y} - \mathbb{E}[\textnormal{Y}])$$
+  </div>
+  <div class="equation">
+    $$\implies \alpha^* = \frac{\text{Cov}(\textnormal{X}, \textnormal{Y})}{\text{Var}(\textnormal{Y})}=\rho(\textnormal{X}, \textnormal{Y})\frac{\sigma(\textnormal{X})}{\sigma(\textnormal{Y})}$$
+  </div>
+</div>
+
+
+<br>
+<h3 class="title is-4">Optimal Coefficient in SVRG</h3>
+<p>We introduce a coefficient vector to SVRG and apply control variates to each component:</p>
+<div style="margin: 0.6em 0;">
+  <div class="equation">
+    $$g_i^t = \nabla f_i(\theta^t)-\alpha^t\odot(\nabla f_i(\theta^{\text{snapshot}})-\nabla f(\theta^{\text{snapshot}}))$$
+  </div>
+  <div class="equation">
+    $$\implies \alpha^{t*}_k = \frac{\text{Cov}(\nabla f_{\cdot,k}(\theta^{\text{snapshot}}), \nabla f_{\cdot,k}(\theta^t))}{\text{Var}(\nabla f_{\cdot,k}(\theta^{\text{snapshot}}))} = \rho(\nabla f_{\cdot, k}(\theta^{\text{snapshot}}), \nabla f_{\cdot, k}(\theta^t))\frac{\sigma(\nabla f_{\cdot, k}(\theta^t))}{\sigma(\nabla f_{\cdot, k}(\theta^{\text{snapshot}}))}$$
+  </div>
+</div>
+<br>
+
+<h3 class="title is-4">Observations on Optimal Coefficient</h3>
+<ul style="list-style-type: disc; margin-left: 2em;">
+  <li>A deeper model has a smaller optimal coefficient.</li>
+  <li>The optimal coefficient decreases as training progresses.</li>
+</ul>
+
+<div class="columns is-centered">
+  <div class="column is-half">
+    <figure class="image">
+      <img src="./static/images/optimal_coefficient0.pdf" alt="Optimal coefficient with SGD">
+      <figcaption class="has-text-centered" style="padding-left: 30px;">(a) SGD</figcaption>
+    </figure>
+  </div>
+  <div class="column is-half">
+    <figure class="image">
+      <img src="./static/images/optimal_coefficient1.pdf" alt="Optimal coefficient with AdamW">
+      <figcaption class="has-text-centered" style="padding-left: 30px;">(b) AdamW</figcaption>
+    </figure>
+  </div>
+</div>
+
+
+<p><b><i>How do we approximate the optimal coefficient?</i></b></p>
+<br>
+<br>
+  <div class="columns is-centered">
+    <div class="column is-full">
+      <h2 class="title is-3 has-text-centered">Method</h2>
+    </div>
+  </div>
+<h3 class="title is-4">\(\alpha\)-SVRG</h3>
+
+<p>We propose to apply a linearly decreasing coefficient \(\alpha\) to control the variance reduction strength. It achieves a similar gradient variance reduction effect compared with SVRG using optimal coefficient.</p>
+<br>
+<div class="columns is-multiline">
+  <div class="column is-half">
+    <figure class="image">
+      <img src="./static/images/optimal_svrg_vs_alpha_svrg_sgd_var_0.pdf" alt="Variance comparison 0">
+    </figure>
+  </div>
+  <div class="column is-half">
+    <figure class="image">
+      <img src="./static/images/optimal_svrg_vs_alpha_svrg_sgd_var_1.pdf" alt="Variance comparison 1">
+    </figure>
+  </div>
+  <div class="column is-half">
+    <figure class="image">
+      <img src="./static/images/optimal_svrg_vs_alpha_svrg_sgd_var_2.pdf" alt="Variance comparison 2">
+    </figure>
+  </div>
+  <div class="column is-half">
+    <figure class="image">
+      <img src="./static/images/optimal_svrg_vs_alpha_svrg_sgd_loss.pdf" alt="Loss comparison">
+    </figure>
+  </div>
+</div>
+
+<div class="columns is-centered">
+  <div class="column is-full">
+    <h2 class="title is-3 has-text-centered">Experiments</h2>
+  </div>
+</div>
+
+<h3 class="title is-4">Results on ImageNet-1K</h3>
+
+<div class="columns is-centered">
+  <div class="column is-full">
+    <figure class="image">
+      <img src="./static/images/imagenet.jpg" alt="Results on ImageNet">
+    </figure>
+  </div>
+</div>
+
+<h3 class="title is-4">Results on Small Image Classification Datasets</h3>
+
+<div class="columns is-centered">
+  <div class="column is-full">
+    <figure class="image">
+      <img src="./static/images/small_dataset.jpg" alt="Results on small datasets">
+    </figure>
+  </div>
+</div>
+
+
+</section>
+
+
+<section class="section" id="BibTeX">
+  <div class="container is-max-desktop content">
+    <h2 class="title">BibTeX</h2>
+    <pre><code>@inproceedings{yin2023coefficient,
+      title={A Coefficient Makes SVRG Effective}, 
+      author={Yida Yin and Zhiqiu Xu and Zhiyuan Li and Trevor Darrell and Zhuang Liu},
+      year={2025},
+      booktitle={ICLR},
+    }
+    </code></pre>
+  </div>
+</section>
+
+
+<footer class="footer">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content">
+          <p>
+            This website is licensed under a <a rel="license"
+                                                href="http://creativecommons.org/licenses/by-sa/4.0/">Creative
+            Commons Attribution-ShareAlike 4.0 International License</a>.
+          </p>
+          <p>
+            Website adapted from the following <a
+              href="https://github.com/nerfies/nerfies.github.io">source code</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
