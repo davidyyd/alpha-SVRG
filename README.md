@@ -120,10 +120,10 @@ This repository is built using the [timm](https://github.com/rwightman/pytorch-i
 ## Citation
 If you find this repository helpful, please consider citing:
 ```bibtex
-@article{yin2023coefficient,
+@inproceedings{yin2023coefficient,
       title={A Coefficient Makes SVRG Effective}, 
       author={Yida Yin and Zhiqiu Xu and Zhiyuan Li and Trevor Darrell and Zhuang Liu},
-      year={2023},
-      journal={arXiv preprint arXiv:2311.05589},
+      year={2025},
+      booktitle={ICLR},
 }
 ```
